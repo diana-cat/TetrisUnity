@@ -10,28 +10,20 @@ public class Figure : MonoBehaviour
     [SerializeField]
     private TypeFigure type;
     [SerializeField]
-    private Grid grid;
 
-    private void Update()
+    private bool isDead = false;
+
+    public bool IsDead { get => isDead; }
+
+    public Figure(Vector3Int pivot, Vector3Int[] points,  TypeFigure type)
     {
-        if (Input.GetKeyDown(KeyCode.Space)) 
-        {
-            RotateLeft();        
-        }
+        this.pivot = pivot;
+        this.points = new Vector3Int[4];
+        this.type = type;
 
-        if(Input.GetKeyDown(KeyCode.LeftArrow))
+        for (int i = 0; i < this.points.Length; i++)
         {
-            MoveLeft();
-        }
-
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            MoveRight();
-        }
-
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            MoveDown();
+            this.points[i] = points[i];
         }
     }
 
@@ -51,7 +43,7 @@ public class Figure : MonoBehaviour
         }
     }
 
-    public void MoveLeft()
+    public void MoveLeft(Grid grid)
     {
         pivot += Vector3Int.left;
         if (!grid.IsCellsEmpty(PointsPivot()))
@@ -60,7 +52,7 @@ public class Figure : MonoBehaviour
         }
     }
 
-    public void MoveRight()
+    public void MoveRight(Grid grid)
     {
         pivot += Vector3Int.right;
         if (!grid.IsCellsEmpty(PointsPivot()))
@@ -69,12 +61,13 @@ public class Figure : MonoBehaviour
         }
     }
 
-    public void MoveDown()
+    public void MoveDown(Grid grid)
     {
         pivot += Vector3Int.down;
         if (!grid.IsCellsEmpty(PointsPivot()))
         {
             pivot += Vector3Int.up;
+            isDead = true;
         }
     }
 
@@ -112,7 +105,7 @@ public class Figure : MonoBehaviour
         }
     }
 
-    public void RotateLeft()
+    public void RotateLeft(Grid grid)
     {
         RotateLeftCount();
         if (!grid.IsCellsEmpty(PointsPivot()))
@@ -163,4 +156,12 @@ public class Figure : MonoBehaviour
             return false;
         }
     }
+
+
+    public Figure Clone()
+    {
+        return new Figure(new Vector3Int(4, 20, 0), points, type);
+    }
+
 }
+

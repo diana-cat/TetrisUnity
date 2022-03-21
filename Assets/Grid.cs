@@ -25,8 +25,7 @@ public class Grid : MonoBehaviour
             }
         }
 
-        return true;
-        
+        return true;        
     }
 
     private void OnDrawGizmos()
@@ -42,11 +41,11 @@ public class Grid : MonoBehaviour
 
     private bool Check(Vector3Int point)
     {
-        return (point.x < 0 || point.x >= width || point.y < 0 || point.y >= height);
+        return (point.x < 0 || point.x >= width || point.y < 0);
     }
 }
 
-enum TypeFigure
+public enum TypeFigure
 {
     Matrix2x2,
     Matrix3x3,

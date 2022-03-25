@@ -2,52 +2,140 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 [Serializable]
 public class Grid : MonoBehaviour
 {
-    private int width = 10;
-    private int height = 20;
-    private int[] cells;
+    public const int Width = 10;
+    public const int Height = 20;
+    private GridCell[,] cells;
+    private Color color;
+
 
     private void Start()
     {
-        cells = new int[width * height];
+        cells = new GridCell[Width, Height];
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                cells[i, j].Color = Color.gray;
+            }
+        }
+    }
+
+    public IEnumerable<Cell> SkipBadPoint(IEnumerable<Cell> source) 
+    {
+        foreach (var item in source)
+        {
+            if (item.Position.x  < Width && item.Position.y < Height)
+            {
+                yield return item;
+            }   
+        }
     }
 
     public bool IsCellsEmpty(IEnumerable<Vector3Int> points)
     {
         foreach (var item in points)
         {
-            if (Check(item))
-            {
-                return false;
+            if (IsOutside(item) || IsNotEmpty(item))
+            {                
+               return false;
             }
         }
 
         return true;        
     }
 
-    private void OnDrawGizmos()
+    private bool IsOutside(Vector3Int point)
     {
-        for (int i = 0; i < width; i++)
+        return (point.x < 0 || point.x >= Width || point.y < 0);
+    }
+
+    private bool IsNotEmpty(Vector3Int point)
+    {
+        return (point.y < Height && cells[point.x, point.y].IsNotEmpty);
+    }
+
+    public void DiedFigure(IEnumerable<Cell> points)
+    {
+        foreach (var item in points)
         {
-            for (int j = 0; j < height; j++)
+            cells[item.Position.x, item.Position.y].IsNotEmpty = true;
+            cells[item.Position.x, item.Position.y].Color = item.Color;
+        }
+    }
+
+    public List<int> FindIndexRowsToRemove()
+    {
+        List<int> indexRow = new List<int>();
+        int tmp = 0;
+
+        for (int i = 0; i < Height; i++)
+        {
+            for (int j = 0; j < Width; j++)
             {
-                Gizmos.DrawWireCube(new Vector3(i, j), Vector3.one * 0.9f);
+                if (cells[j, i].IsNotEmpty)
+                {
+                    tmp++;
+                }
+            }
+            if (tmp == Width)
+            {
+                indexRow.Add(i);
+            }
+            tmp = 0;
+        }
+
+        return indexRow;
+    }
+
+    public void RemoveRow(List<int> rowsToRemove)
+    {
+        foreach (var i in rowsToRemove)
+        {
+            for (int j = 0; j < Width; j++)
+            {
+                cells[j, i].IsNotEmpty = !cells[j, i].IsNotEmpty;
+                cells[j, i].Color = color;
+            }
+        }
+        MoveAllDown(rowsToRemove);
+    }
+
+    private void MoveAllDown(List<int> rowsToRemove)
+    {
+        for (int i = 0; i < Height; i++)
+        {
+            int rowsUnder = rowsToRemove.Where(item => i > item).Count();
+            for (int j = 0; j < Width; j++)
+            {
+                cells[j, i - rowsUnder] = cells[j, i];
             }
         }
     }
 
-    private bool Check(Vector3Int point)
+    public IEnumerable<Cell> GetCells()
     {
-        return (point.x < 0 || point.x >= width || point.y < 0);
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                yield return new Cell()
+                {
+                    Position = new Vector3Int(i, j, 0),
+                    Color = cells[i, j].Color
+                };
+            }
+        }
+    }
+
+    public struct GridCell
+    {
+        public bool IsNotEmpty;
+        public Color Color;
     }
 }
 
-public enum TypeFigure
-{
-    Matrix2x2,
-    Matrix3x3,
-    Matrix4x4
-}

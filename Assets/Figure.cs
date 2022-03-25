@@ -10,16 +10,18 @@ public class Figure : MonoBehaviour
     [SerializeField]
     private TypeFigure type;
     [SerializeField]
+    private Color color;
 
     private bool isDead = false;
 
-    public bool IsDead { get => isDead; }
+    public bool IsDead { get => isDead; set => isDead = value; }
 
-    public Figure(Vector3Int pivot, Vector3Int[] points,  TypeFigure type)
+    public Figure(Vector3Int pivot, Vector3Int[] points,  TypeFigure type, Color color)
     {
         this.pivot = pivot;
         this.points = new Vector3Int[4];
         this.type = type;
+        this.color = color;
 
         for (int i = 0; i < this.points.Length; i++)
         {
@@ -27,7 +29,7 @@ public class Figure : MonoBehaviour
         }
     }
 
-    private IEnumerable<Vector3Int> PointsPivot()
+    public IEnumerable<Vector3Int> PointsPivot()
     {
         foreach (var item in points)
         {
@@ -160,8 +162,31 @@ public class Figure : MonoBehaviour
 
     public Figure Clone()
     {
-        return new Figure(new Vector3Int(4, 20, 0), points, type);
+        return new Figure(pivot, points, type, color);
     }
 
+    public IEnumerable<Cell> GetCells()
+    {
+        foreach (var item in PointsPivot())
+        {
+            yield return new Cell()
+            {
+                Position = item,
+                Color = color
+            };
+        }
+    }
 }
 
+public enum TypeFigure
+{
+    Matrix2x2,
+    Matrix3x3,
+    Matrix4x4
+}
+
+public struct Cell 
+{
+    public Vector3Int Position;
+    public Color Color;
+}

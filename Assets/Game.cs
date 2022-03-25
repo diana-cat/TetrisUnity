@@ -1,20 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Game : MonoBehaviour
 {
-    
     private Grid grid;
-    [SerializeField]
-    private Figure[] figures;
     private Figure figure;
+    private Draw draw;
+    private FigureCreator creator;
 
 
     void Start()
     {
-        figure = figures[Random.Range(0, figures.Length)].Clone();
+        creator = new FigureCreator();
+
+        figure = creator.CreateNewFigure();
         grid = GetComponent<Grid>();
+        draw = GetComponent<Draw>();
     }
 
 
@@ -44,8 +47,20 @@ public class Game : MonoBehaviour
         }
         else
         {
-            figure = figures[Random.Range(0, figures.Length)].Clone();
-            Debug.Log("No move");
+            grid.DiedFigure(figure.GetCells());
+            figure = creator.CreateNewFigure();
+
+            var count = grid.FindIndexRowsToRemove().Count;          
+            if(count > 0)
+            {
+                grid.RemoveRow(grid.FindIndexRowsToRemove());
+            }
         }
+    }
+
+    private void FixedUpdate()
+    {
+        draw.DrawCells(grid.GetCells());
+        draw.DrawCells(grid.SkipBadPoint(figure.GetCells()));
     }
 }

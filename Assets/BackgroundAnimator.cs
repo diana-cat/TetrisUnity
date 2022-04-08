@@ -4,54 +4,76 @@ using UnityEngine;
 
 public class BackgroundAnimator : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject[] templates;
+    private const int FigureCount = 10;
 
-    private GameObject[] figures;
-
-    private GameObject figure;
-    [SerializeField]
-    private float speed;
-    
     [SerializeField]
     private float deathLine;
     [SerializeField]
-    [Range(0,20)]
+    [Range(0, 20)]
     private float offset;
+    [SerializeField]
+    private GameObject[] templates;
 
+    private List<FigureAnimation> figures;
 
 
     private void Start()
     {
-        figures = new GameObject[templates.Length];
-        for (int i = 0; i < templates.Length; i++)
+        figures = new List<FigureAnimation>();
+        for (int i = 0; i < Mathf.Max(FigureCount, templates.Length); i++)
         {
-            figures[i] = Instantiate(templates[i], new Vector3(-10, 0, 0), Quaternion.identity);
+            FigureAnimation newFigure = null;
+            if (i < templates.Length)
+            {
+                newFigure = Instantiate(templates[i], new Vector3(-10, 0, 0), Quaternion.identity).GetComponent<FigureAnimation>();
+            }
+            else 
+            {
+                var index = Random.Range(0, templates.Length);
+                newFigure = Instantiate(templates[index], new Vector3(-10, 0, 0), Quaternion.identity).GetComponent<FigureAnimation>();
+            }
+
+            figures.Add(newFigure);
         }
 
-        ChoiceFigure();
+        StartCoroutine(Animation());
     }
 
-
-    public void FixedUpdate()
+    private FigureAnimation ChoiceFigure()
     {
-        if (figure != null)
+        foreach (var item in figures)
         {
-            if(figure.transform.position.y > deathLine)
+            if (item.IsDead) 
             {
-                figure.transform.position = new Vector3(figure.transform.position.x, figure.transform.position.y - speed * Time.deltaTime, 0);
-                figure.transform.RotateAround(Vector3.forward, 5 * Time.deltaTime);
-            }
-            else
-            {
-                figure = null;
+                return item;
             }
         }
-        else
+
+        return null;                
+    }
+
+
+    private IEnumerator Animation()
+    {
+        while (true) 
         {
-            ChoiceFigure();
+            var activeFigure = ChoiceFigure();
+           
+            if (activeFigure == null) 
+            {
+                yield return new WaitForSeconds(1f);
+                continue;
+            }
+
+
+            var pivot = this.transform.position;
+            activeFigure.transform.position = new Vector3(Random.Range(pivot.x - offset, pivot.x + offset), pivot.y);            
+            activeFigure.StartAnimation(deathLine);
+
+            yield return new WaitForSeconds(1f);
         }
     }
+
 
     private void OnDrawGizmos()
     {
@@ -76,14 +98,5 @@ public class BackgroundAnimator : MonoBehaviour
         to = new Vector3(pivot.x + offset, pivot.y - offset);
 
         Gizmos.DrawLine(from, to);
-    }
-
-    private void ChoiceFigure()
-    {
-        figure = figures[Random.Range(0, figures.Length)];
-
-        var pivot = this.transform.position;
-
-        figure.transform.position = new Vector3(Random.Range(pivot.x - offset, pivot.x + offset), pivot.y);
     }
 }

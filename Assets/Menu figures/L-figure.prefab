@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6232377788311308869}
+  - component: {fileID: -1168393565988475459}
   m_Layer: 0
   m_Name: L-figure
   m_TagString: Untagged
@@ -35,6 +36,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-1168393565988475459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 586707429513769005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9387ddad103a1d47aed02f8d7a75f3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 2.07
+  degreesPerSecond: 20
 --- !u!1 &1603211020295779067
 GameObject:
   m_ObjectHideFlags: 0

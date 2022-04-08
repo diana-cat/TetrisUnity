@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,22 +7,52 @@ public class FigureAnimation : MonoBehaviour
 {
     [SerializeField]
     private float speed;
-    private Transform figure;
+    [SerializeField]
+    private float degreesPerSecond = 20;
 
+    private Transform figureTransform;
+    private Action[] action;
 
-    public void StartAnimation(Transform figure, float deathLine) 
+    public bool IsDead { get; private set; } = true;
+
+    private void Awake()
     {
-        this.figure= figure;
+        figureTransform = this.GetComponent<Transform>();
+        action = new Action[2]
+        {
+            Move,
+            MoveAndRotate
+        };
+    }
+
+    public void StartAnimation( float deathLine) 
+    {
+        IsDead = false;
         StartCoroutine(Animation(deathLine));
+        
     }
 
 
     private IEnumerator Animation(float deathLine)
     {
-        while (figure.transform.position.y > deathLine)
+        Action someAction = action[UnityEngine.Random.Range(0, action.Length)];
+        while (figureTransform.position.y > deathLine)
         {
-            figure.transform.position = new Vector3(figure.transform.position.x, figure.transform.position.y - speed * Time.deltaTime, 0);
+            someAction.Invoke();
             yield return new WaitForFixedUpdate();
         }
+        IsDead = true;
+    }
+
+    private void Move()
+    {
+        var newPosition = figureTransform.position - Vector3.up * speed * Time.deltaTime;
+        figureTransform.position = newPosition; 
+    }
+
+    private void MoveAndRotate()
+    {
+        Move();
+        figureTransform.Rotate(new Vector3(0, 0, degreesPerSecond) * Time.deltaTime);
     }
 }

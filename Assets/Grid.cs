@@ -3,17 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Linq;
-
-[Serializable]
-public class Grid : MonoBehaviour
+public class Grid
 {
     public const int Width = 10;
     public const int Height = 20;
     private GridCell[,] cells;
     private Color color;
 
-
-    private void Start()
+    public  Grid()
     {
         cells = new GridCell[Width, Height];
         for (int i = 0; i < Width; i++)

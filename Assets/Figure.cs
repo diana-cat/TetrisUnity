@@ -1,15 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class Figure : MonoBehaviour
+public class Figure
 {
-    [SerializeField]
     private Vector3Int pivot;
-    [SerializeField]
     private Vector3Int[] points; // 4 points
-    [SerializeField]
-    private TypeFigure type;
-    [SerializeField]
+    private TypeFigure type; 
     private Color color;
 
     private bool isDead = false;
@@ -37,11 +33,11 @@ public class Figure : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
+    public void MoveToEnd(Grid grid)
     {
-        foreach (var item in PointsPivot())
+        while(!IsDead)
         {
-            Gizmos.DrawCube(item, Vector3.one);
+            MoveDown(grid);
         }
     }
 

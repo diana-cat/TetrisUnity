@@ -10,51 +10,65 @@ public class Game : MonoBehaviour
     private Draw draw;
     private FigureCreator creator;
 
-
     void Start()
     {
         creator = new FigureCreator();
+        grid = new Grid(); 
+        draw = this.GetComponent<Draw>();
 
         figure = creator.CreateNewFigure();
-        grid = GetComponent<Grid>();
-        draw = GetComponent<Draw>();
+
+        StartCoroutine(Fall());
     }
 
-
-    void Update()
+    private IEnumerator Fall()
     {
-        if (!figure.IsDead) 
-        { 
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                figure.RotateLeft(grid);
-            }
-
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                figure.MoveLeft(grid);
-            }
-
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                figure.MoveRight(grid);
-            }
-
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+        while (true)
+        {
+            if (!figure.IsDead)
             {
                 figure.MoveDown(grid);
             }
-        }
-        else
-        {
-            grid.DiedFigure(figure.GetCells());
-            figure = creator.CreateNewFigure();
-
-            var count = grid.FindIndexRowsToRemove().Count;          
-            if(count > 0)
+            else
             {
-                grid.RemoveRow(grid.FindIndexRowsToRemove());
+                grid.DiedFigure(figure.GetCells());
+                figure = creator.CreateNewFigure();
+
+                var count = grid.FindIndexRowsToRemove().Count;
+                if (count > 0)
+                {
+                    grid.RemoveRow(grid.FindIndexRowsToRemove());
+                }
             }
+            yield return new WaitForSeconds(0.4f);
+        }       
+    }
+
+    void Update()
+    {
+        if (figure.IsDead)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            figure.RotateLeft(grid);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            figure.MoveToEnd(grid);
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            figure.MoveLeft(grid);
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            figure.MoveRight(grid);
         }
     }
 

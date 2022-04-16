@@ -46,6 +46,18 @@ public class Grid
         return true;        
     }
 
+    public void ClearGrid()
+    {
+        for (int i = 0; i < cells.GetLength(0); i++)
+        {
+            for (int j = 0; j < cells.GetLength(1); j++)
+            {
+                cells[i, j].IsNotEmpty = false;
+                cells[i, j].Color = Color.gray;
+            }
+        }
+    }
+
     private bool IsOutside(Vector3Int point)
     {
         return (point.x < 0 || point.x >= Width || point.y < 0);

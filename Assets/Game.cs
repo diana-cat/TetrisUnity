@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.Events;
+using System;
+
+[Serializable]
+public class GameScoreChangeEvent : UnityEvent<int> { }
 
 public class Game : MonoBehaviour
 {
@@ -9,6 +14,15 @@ public class Game : MonoBehaviour
     private Figure figure;
     private Draw draw;
     private FigureCreator creator;
+    private int score;
+    private int[] scoreFromRows = { 100, 400, 700, 1500 };
+    [SerializeField]
+    private UnityEvent gameEnd;
+    [SerializeField]
+    private UnityEvent gameStart;
+    [SerializeField]
+    private GameScoreChangeEvent scoreChange;
+
 
     void Start()
     {
@@ -16,9 +30,7 @@ public class Game : MonoBehaviour
         grid = new Grid(); 
         draw = this.GetComponent<Draw>();
 
-        figure = creator.CreateNewFigure();
-
-        StartCoroutine(Fall());
+        Restart();
     }
 
     private IEnumerator Fall()
@@ -31,13 +43,22 @@ public class Game : MonoBehaviour
             }
             else
             {
-                grid.DiedFigure(figure.GetCells());
+                try
+                {
+                    grid.DiedFigure(figure.GetCells());
+                }
+                catch
+                {
+                    gameEnd.Invoke();
+                    yield break;
+                }
                 figure = creator.CreateNewFigure();
 
                 var count = grid.FindIndexRowsToRemove().Count;
                 if (count > 0)
                 {
                     grid.RemoveRow(grid.FindIndexRowsToRemove());
+                    score += scoreFromRows[count-1];
                 }
             }
             yield return new WaitForSeconds(0.4f);
@@ -76,5 +97,15 @@ public class Game : MonoBehaviour
     {
         draw.DrawCells(grid.GetCells());
         draw.DrawCells(grid.SkipBadPoint(figure.GetCells()));
+    }
+
+    public void Restart()
+    {
+        figure = creator.CreateNewFigure();
+        grid.ClearGrid();
+        score = 0;
+        StartCoroutine(Fall());
+
+        gameStart.Invoke();
     }
 }

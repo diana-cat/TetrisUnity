@@ -7,6 +7,9 @@ using System;
 
 [Serializable]
 public class GameScoreChangeEvent : UnityEvent<int> { }
+[Serializable]
+public class GamePauseEvent : UnityEvent<bool> { }
+
 
 public class Game : MonoBehaviour
 {
@@ -15,6 +18,8 @@ public class Game : MonoBehaviour
     private Draw draw;
     private FigureCreator creator;
     private int score;
+    private bool isPaused;
+
     private int[] scoreFromRows = { 100, 400, 700, 1500 };
     [SerializeField]
     private UnityEvent gameEnd;
@@ -22,6 +27,9 @@ public class Game : MonoBehaviour
     private UnityEvent gameStart;
     [SerializeField]
     private GameScoreChangeEvent scoreChange;
+    [SerializeField]
+    private GamePauseEvent gamePaused;
+    private Coroutine coroutine;
 
 
     void Start()
@@ -59,15 +67,34 @@ public class Game : MonoBehaviour
                 {
                     grid.RemoveRow(grid.FindIndexRowsToRemove());
                     score += scoreFromRows[count-1];
+                    scoreChange.Invoke(score);
                 }
             }
             yield return new WaitForSeconds(0.4f);
         }       
     }
 
+    public void Pause() 
+    {
+        if (coroutine != null)
+        {
+            StopCoroutine(coroutine);
+        }
+        isPaused = true;
+        gamePaused.Invoke(isPaused);
+    }
+
+    public void Resume() 
+    {
+        coroutine = StartCoroutine(Fall());
+        isPaused = false;
+        gamePaused.Invoke(isPaused);
+    }
+
+
     void Update()
     {
-        if (figure.IsDead)
+        if (figure.IsDead || isPaused)
         {
             return;
         }
@@ -104,8 +131,14 @@ public class Game : MonoBehaviour
         figure = creator.CreateNewFigure();
         grid.ClearGrid();
         score = 0;
-        StartCoroutine(Fall());
+        
+        if (coroutine != null)
+        {
+            StopCoroutine(coroutine);
+        }
+        coroutine = StartCoroutine(Fall());
 
         gameStart.Invoke();
+        scoreChange.Invoke(score);
     }
 }

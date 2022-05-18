@@ -51,31 +51,63 @@ public class Game : MonoBehaviour
             }
             else
             {
-                try
-                {
-                    grid.DiedFigure(figure.GetCells());
-                }
-                catch
+                var ok = TrySaveFigure();
+                if (!ok)
                 {
                     gameEnd.Invoke();
                     yield break;
                 }
-                figure = creator.CreateNewFigure();
-
-                var count = grid.FindIndexRowsToRemove().Count;
-                if (count > 0)
+                else
                 {
-                    grid.RemoveRow(grid.FindIndexRowsToRemove());
-                    score += scoreFromRows[count-1];
-                    scoreChange.Invoke(score);
+                    var lines = RemoveFilledRows();
+                    UpdateScore(lines);
+                    figure = creator.CreateNewFigure();
                 }
             }
             yield return new WaitForSeconds(0.4f);
         }       
     }
 
+
+    private int RemoveFilledRows() 
+    {
+        var count = grid.FindIndexRowsToRemove().Count;
+        if (count > 0)
+        {
+            grid.RemoveRow(grid.FindIndexRowsToRemove());
+        }
+        return count;
+    }
+
+    private void UpdateScore(int removedLines) 
+    {
+        if (removedLines > 0)
+        {
+            score += scoreFromRows[removedLines - 1];
+            scoreChange.Invoke(score);
+        }
+    }
+
+    private bool TrySaveFigure() 
+    {
+        try
+        {
+            grid.SaveFigure(figure.GetCells());
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    } 
+
     public void Pause() 
     {
+        if (isPaused)
+        {
+            return;
+        }
+
         if (coroutine != null)
         {
             StopCoroutine(coroutine);
@@ -86,6 +118,11 @@ public class Game : MonoBehaviour
 
     public void Resume() 
     {
+        if (!isPaused) 
+        {
+            return;
+        }
+
         coroutine = StartCoroutine(Fall());
         isPaused = false;
         gamePaused.Invoke(isPaused);
@@ -130,14 +167,17 @@ public class Game : MonoBehaviour
     {
         figure = creator.CreateNewFigure();
         grid.ClearGrid();
+
         score = 0;
-        
+
         if (coroutine != null)
         {
             StopCoroutine(coroutine);
         }
         coroutine = StartCoroutine(Fall());
-
+        
+        
+        score = 0;
         gameStart.Invoke();
         scoreChange.Invoke(score);
     }

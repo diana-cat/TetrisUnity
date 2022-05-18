@@ -19,27 +19,32 @@ public class BackgroundAnimator : MonoBehaviour
 
     private void Start()
     {
-        figures = new List<FigureAnimation>();
-        for (int i = 0; i < Mathf.Max(FigureCount, templates.Length); i++)
-        {
-            FigureAnimation newFigure = null;
-            if (i < templates.Length)
-            {
-                newFigure = Instantiate(templates[i], new Vector3(-10, 0, 0), Quaternion.identity).GetComponent<FigureAnimation>();
-            }
-            else 
-            {
-                var index = Random.Range(0, templates.Length);
-                newFigure = Instantiate(templates[index], new Vector3(-10, 0, 0), Quaternion.identity).GetComponent<FigureAnimation>();
-            }
-
-            figures.Add(newFigure);
-        }
-
+        CreateObjectPool();
         StartCoroutine(Animation());
     }
 
-    private FigureAnimation ChoiceFigure()
+    private void CreateObjectPool()
+    {
+        figures = new List<FigureAnimation>();
+        
+        var index = 0;
+        for (int i = 0; i < Mathf.Max(FigureCount, templates.Length); i++)
+        {
+            if (i < templates.Length)
+            {
+                index = i;
+            }
+            else
+            {
+                index = Random.Range(0, templates.Length);
+            }
+
+            var newFigure = Instantiate(templates[index], new Vector3(-10, 0, 0), Quaternion.identity).GetComponent<FigureAnimation>();
+            figures.Add(newFigure);
+        }
+    }
+
+    private FigureAnimation GetFreeFigure()
     {
         foreach (var item in figures)
         {
@@ -48,7 +53,6 @@ public class BackgroundAnimator : MonoBehaviour
                 return item;
             }
         }
-
         return null;                
     }
 
@@ -57,7 +61,7 @@ public class BackgroundAnimator : MonoBehaviour
     {
         while (true) 
         {
-            var activeFigure = ChoiceFigure();
+            var activeFigure = GetFreeFigure();
            
             if (activeFigure == null) 
             {

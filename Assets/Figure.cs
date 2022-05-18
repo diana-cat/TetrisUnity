@@ -15,17 +15,17 @@ public class Figure
     public Figure(Vector3Int pivot, Vector3Int[] points,  TypeFigure type, Color color)
     {
         this.pivot = pivot;
-        this.points = new Vector3Int[4];
+        this.points = points;// new Vector3Int[4];
         this.type = type;
         this.color = color;
 
-        for (int i = 0; i < this.points.Length; i++)
-        {
-            this.points[i] = points[i];
-        }
+        //for (int i = 0; i < this.points.Length; i++)
+        //{
+         //   this.points[i] = points[i];
+        //}
     }
 
-    public IEnumerable<Vector3Int> PointsPivot()
+    public IEnumerable<Vector3Int> GetFigurePoints()
     {
         foreach (var item in points)
         {
@@ -44,7 +44,7 @@ public class Figure
     public void MoveLeft(Grid grid)
     {
         pivot += Vector3Int.left;
-        if (!grid.IsCellsEmpty(PointsPivot()))
+        if (!grid.IsCellsEmpty(GetFigurePoints()))
         {
             pivot += Vector3Int.right;
         }
@@ -53,7 +53,7 @@ public class Figure
     public void MoveRight(Grid grid)
     {
         pivot += Vector3Int.right;
-        if (!grid.IsCellsEmpty(PointsPivot()))
+        if (!grid.IsCellsEmpty(GetFigurePoints()))
         {
             pivot += Vector3Int.left;
         }
@@ -62,7 +62,7 @@ public class Figure
     public void MoveDown(Grid grid)
     {
         pivot += Vector3Int.down;
-        if (!grid.IsCellsEmpty(PointsPivot()))
+        if (!grid.IsCellsEmpty(GetFigurePoints()))
         {
             pivot += Vector3Int.up;
             isDead = true;
@@ -106,7 +106,7 @@ public class Figure
     public void RotateLeft(Grid grid)
     {
         RotateLeftCount();
-        if (!grid.IsCellsEmpty(PointsPivot()))
+        if (!grid.IsCellsEmpty(GetFigurePoints()))
         {
             RotateRightCount();
         }
@@ -145,14 +145,7 @@ public class Figure
             }
         }
 
-        if (count == 3)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return count == 3;
     }
 
 
@@ -163,7 +156,7 @@ public class Figure
 
     public IEnumerable<Cell> GetCells()
     {
-        foreach (var item in PointsPivot())
+        foreach (var item in GetFigurePoints())
         {
             yield return new Cell()
             {

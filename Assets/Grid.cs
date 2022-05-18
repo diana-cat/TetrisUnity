@@ -68,7 +68,7 @@ public class Grid
         return (point.y < Height && cells[point.x, point.y].IsNotEmpty);
     }
 
-    public void DiedFigure(IEnumerable<Cell> points)
+    public void SaveFigure(IEnumerable<Cell> points)
     {
         foreach (var item in points)
         {
@@ -80,22 +80,21 @@ public class Grid
     public List<int> FindIndexRowsToRemove()
     {
         List<int> indexRow = new List<int>();
-        int tmp = 0;
 
-        for (int i = 0; i < Height; i++)
+        for (int row = 0; row < Height; row++)
         {
-            for (int j = 0; j < Width; j++)
+            int filledSellsCount = 0;
+            for (int column = 0; column < Width; column++)
             {
-                if (cells[j, i].IsNotEmpty)
+                if (cells[column, row].IsNotEmpty)
                 {
-                    tmp++;
+                    filledSellsCount++;
                 }
             }
-            if (tmp == Width)
+            if (filledSellsCount == Width)
             {
-                indexRow.Add(i);
+                indexRow.Add(row);
             }
-            tmp = 0;
         }
 
         return indexRow;

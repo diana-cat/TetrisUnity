@@ -28,8 +28,7 @@ public class FigureAnimation : MonoBehaviour
     public void StartAnimation( float deathLine) 
     {
         IsDead = false;
-        StartCoroutine(Animation(deathLine));
-        
+        StartCoroutine(Animation(deathLine));        
     }
 
 
@@ -46,13 +45,12 @@ public class FigureAnimation : MonoBehaviour
 
     private void Move()
     {
-        var newPosition = figureTransform.position - Vector3.up * speed * Time.deltaTime;
-        figureTransform.position = newPosition; 
+        figureTransform.Translate(Vector3.down * speed * Time.deltaTime, Space.World);
     }
 
     private void MoveAndRotate()
     {
-        Move();
+        figureTransform.Translate(Vector3.down * speed * Time.deltaTime, Space.World);
         figureTransform.Rotate(new Vector3(0, 0, degreesPerSecond) * Time.deltaTime);
     }
 }
